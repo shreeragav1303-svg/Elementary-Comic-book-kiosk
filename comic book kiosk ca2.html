@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panel Stop – Comic Book Kiosk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --paper:#faf8f2;--ink:#14213d;--card:#ffffff;--muted:#4a5568;
+  --pink:#e5287a;--cyan:#0f8fae;--yellow:#ffd23f;--on-accent:#ffffff;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){color-scheme:dark;--paper:#10162b;--ink:#f4f1e8;--card:#1b2442;--muted:#aab4c8;--on-accent:#10162b}
+}
+:root[data-theme="dark"]{color-scheme:dark;--paper:#10162b;--ink:#f4f1e8;--card:#1b2442;--muted:#aab4c8;--on-accent:#10162b}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Lexend,system-ui,sans-serif;line-height:1.5;padding-bottom:120px}
+header{padding:24px 20px 8px;max-width:1100px;margin:0 auto}
+h1{font-family:Bangers,Impact,sans-serif;font-weight:400;font-size:clamp(3rem,10vw,5.5rem);line-height:.95;margin:0;letter-spacing:.02em;
+  color:var(--yellow);-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:5px 5px 0 var(--pink)}
+header p{margin:12px 0 0;font-size:1.15rem;max-width:42ch;color:var(--muted)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;padding:16px 20px;max-width:1100px;margin:0 auto}
+.chip{font:600 1.05rem Lexend,sans-serif;min-height:56px;padding:0 22px;border:3px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+button:focus-visible{outline:4px solid var(--cyan);outline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:22px;padding:8px 20px 24px;max-width:1100px;margin:0 auto}
+.comic{position:relative;text-align:left;font:inherit;color:inherit;background:var(--card);border:3px solid var(--ink);border-radius:6px;padding:0;cursor:pointer;
+  box-shadow:6px 6px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.comic:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--ink)}
+.cover{aspect-ratio:2/3;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;border-bottom:3px solid var(--ink);position:relative;overflow:hidden;border-radius:3px 3px 0 0}
+.cover::before{content:"";position:absolute;inset:0;background:radial-gradient(rgba(0,0,0,.28) 22%,transparent 24%) 0 0/9px 9px;mask-image:linear-gradient(200deg,transparent 30%,#000);-webkit-mask-image:linear-gradient(200deg,transparent 30%,#000)}
+.cover b{position:relative;font:400 2rem/1 Bangers,Impact,sans-serif;letter-spacing:.03em;color:#fff;text-shadow:2px 2px 0 #14213d,-1px -1px 0 #14213d,2px -1px 0 #14213d,-1px 2px 0 #14213d}
+.cover i{position:absolute;top:10px;left:10px;font:600 .8rem Lexend,sans-serif;font-style:normal;background:var(--yellow);color:#14213d;border:2px solid #14213d;padding:1px 8px;border-radius:4px}
+.meta{padding:10px 12px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.meta span{font-size:.9rem;color:var(--muted)}
+.price{font-weight:600;font-size:1.1rem}
+.badge{position:absolute;top:-12px;right:-12px;min-width:40px;height:40px;border-radius:50%;background:var(--pink);color:#fff;border:3px solid var(--ink);display:grid;place-items:center;font:400 1.4rem Bangers,sans-serif}
+.tray{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:5}
+.tray strong{font-size:1.15rem}
+.btn{font:600 1.1rem Lexend,sans-serif;min-height:56px;padding:0 26px;border:3px solid var(--ink);border-radius:8px;background:var(--pink);color:#fff;cursor:pointer;box-shadow:4px 4px 0 var(--ink)}
+.tray .btn{border-color:var(--paper);box-shadow:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.alt{background:var(--card);color:var(--ink)}
+dialog{width:min(560px,94vw);border:4px solid var(--ink);border-radius:10px;background:var(--paper);color:var(--ink);padding:24px;box-shadow:10px 10px 0 var(--pink)}
+dialog::backdrop{background:rgba(10,14,30,.7)}
+dialog h2{font:400 2.4rem Bangers,Impact,sans-serif;margin:0 0 12px;letter-spacing:.03em}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:2px dashed var(--muted)}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{width:48px;height:48px;font:600 1.4rem Lexend,sans-serif;border:3px solid var(--ink);border-radius:50%;background:var(--card);color:var(--ink);cursor:pointer}
+.total{display:flex;justify-content:space-between;font-size:1.3rem;font-weight:600;padding:16px 0}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.code{font:400 4rem Bangers,Impact,sans-serif;letter-spacing:.08em;text-align:center;background:var(--yellow);color:#14213d;border:4px solid #14213d;border-radius:8px;padding:8px;margin:16px 0}
+.empty{padding:28px 0;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.comic{transition:none}}
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{color-scheme:dark;--paper:#05060f;--ink:#e9ecff;--card:#0e1330;--muted:#a3acd6;--pink:#ff4fa3;--cyan:#4fd8ff;--yellow:#ffd866}
+#sky{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(1.5px 1.5px at 20px 30px,#fff,transparent),radial-gradient(1px 1px at 90px 120px,#cfe3ff,transparent),radial-gradient(1px 1px at 160px 60px,#fff,transparent),radial-gradient(2px 2px at 220px 180px,#ffe9b0,transparent),radial-gradient(1px 1px at 60px 90px,#fff,transparent),linear-gradient(115deg,transparent 28%,rgba(120,100,255,.14) 40%,rgba(255,200,160,.2) 50%,rgba(90,160,255,.14) 60%,transparent 72%),radial-gradient(ellipse 60% 40% at 55% 45%,rgba(255,200,150,.22),transparent 70%),linear-gradient(#05060f,#0a0d24);background-size:260px 220px,260px 220px,260px 220px,260px 220px,410px 360px,100% 100%,100% 100%,100% 100%;background-repeat:repeat,repeat,repeat,repeat,repeat,no-repeat,no-repeat,no-repeat}
+h1{color:var(--yellow);-webkit-text-stroke:3px #1a1040;text-shadow:0 0 28px rgba(255,79,163,.7),4px 4px 0 #6d28d9}
+.comic{border-color:var(--cyan);box-shadow:0 0 18px rgba(79,216,255,.3)}
+.comic:active{transform:scale(.97);box-shadow:0 0 8px rgba(79,216,255,.5)}
+.cover{border-bottom-color:var(--cyan)}
+.tray{background:#0b1030;color:#e9ecff;border-top:3px solid var(--cyan)}
+.btn,.tray .btn{color:#10122b;border-color:#e9ecff;box-shadow:0 0 14px rgba(255,79,163,.5)}
+.btn.alt{background:var(--card);color:var(--ink)}
+.badge{color:#10122b;border-color:#e9ecff}
+dialog{border-color:var(--cyan);box-shadow:0 0 40px rgba(255,79,163,.4)}
+.add{margin:0 12px 12px;padding:10px;text-align:center;font-weight:600;background:var(--cyan);color:#05060f;border-radius:6px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.cartbtn{flex:none;background:var(--yellow);border-color:#e9ecff}
+.cartbtn span{background:#10122b;color:var(--yellow);border-radius:999px;padding:2px 10px;margin-left:8px}
+.ship{position:absolute;width:90px;aspect-ratio:78/36;height:auto;filter:drop-shadow(0 0 8px rgba(79,216,255,.6));pointer-events:none}
+.fly{top:40px;left:0;width:110px;transform:translateX(-160px);animation:fly 18s linear forwards}
+@keyframes fly{to{transform:translateX(calc(100vw + 160px))}}
+.s2{right:90px;top:130px;width:80px;transform:rotate(-14deg)}
+.cship{top:8px;right:8px;width:48px;transform:rotate(-18deg)}
+.art{position:absolute;inset:40px 12px 60px;display:flex}
+.art svg{width:100%;height:100%;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+@media (max-width:600px){.s2{display:none}}
+.login{display:none;place-items:center;min-height:100vh;padding:24px}
+body.locked .login{display:grid}
+body.locked header,body.locked .filters,body.locked .grid,body.locked .tray{display:none}
+.lcard{width:min(460px,100%);background:var(--card);border:3px solid var(--cyan);border-radius:12px;padding:28px;box-shadow:0 0 40px rgba(79,216,255,.3)}
+.lcard h2{font:400 2.6rem Bangers,Impact,sans-serif;letter-spacing:.03em;margin:0 0 4px;color:var(--yellow)}
+.lcard p{margin:0 0 12px;color:var(--muted)}
+.lcard label{display:block;font-weight:600;margin:14px 0 6px}
+.lcard input:not([type=checkbox]){width:100%;min-height:56px;font:1.1rem Lexend,sans-serif;padding:0 14px;border:3px solid var(--muted);border-radius:8px;background:var(--paper);color:var(--ink)}
+.lcard input:focus-visible{outline:3px solid var(--cyan);outline-offset:2px;border-color:var(--cyan)}
+.lcard .show{display:flex;gap:10px;align-items:center;font-weight:400;margin:12px 0}
+.lcard .show input{width:24px;height:24px}
+.err{min-height:1.5em;color:#ff8fb8;margin:8px 0}
+.lcard .btn{width:100%}
+.acct{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+@media (prefers-reduced-motion:reduce){.fly{animation:none;transform:none;left:55%;top:150px}}
+</style>
+</head>
+<body class="locked">
+<div id="sky" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ship" viewBox="-14 -2 78 36"><path d="M-12 11 L2 16 L-12 21 Z" fill="#ffb347"/><path d="M4 16 L22 6 H46 L62 16 L46 26 H22 Z" fill="#cfd6ff" stroke="#10122b" stroke-width="2" stroke-linejoin="round"/><path d="M24 6 L14 0 V9 Z M24 26 L14 32 V23 Z" fill="#ff4fa3" stroke="#10122b" stroke-width="2" stroke-linejoin="round"/><circle cx="42" cy="16" r="5" fill="#4fd8ff" stroke="#10122b" stroke-width="2"/></symbol></svg>
+<svg class="ship fly" viewBox="-14 -2 78 36" aria-hidden="true"><use href="#ship"/></svg>
+<svg class="ship s2" viewBox="-14 -2 78 36" aria-hidden="true"><use href="#ship"/></svg>
+<header>
+  <div class="top">
+    <h1>Panel Stop</h1>
+    <div class="acct"><button class="btn cartbtn" id="cartTop" aria-label="Open cart">Cart <span id="cartN">0</span></button><button class="btn alt" id="out">Sign out</button></div>
+  </div>
+  <p><span id="who"></span> Comics from across the galaxy. Add them to your cart and collect them at the counter.</p>
+</header>
+
+<section class="login" aria-labelledby="lt">
+  <div class="lcard">
+    <h2 id="lt">Welcome to Panel Stop</h2>
+    <p>Log in to start your cart.</p>
+    <form id="loginForm" novalidate autocomplete="off">
+      <label for="uName">Name</label>
+      <input type="text" id="uName" autocomplete="off" placeholder="Your full name">
+      <label for="uEmail">Email ID</label>
+      <input type="email" id="uEmail" autocomplete="off" placeholder="name@example.com">
+      <label for="uPass">Password</label>
+      <input type="password" id="uPass" autocomplete="off" placeholder="At least 6 characters">
+      <label class="show"><input type="checkbox" id="showPw"> Show password</label>
+      <div class="err" id="loginErr" role="alert"></div>
+      <button class="btn" type="submit">Log in</button>
+    </form>
+  </div>
+</section>
+<div class="filters" id="filters" role="group" aria-label="Filter by genre"></div>
+<main class="grid" id="grid"></main>
+
+<div class="tray">
+  <strong id="summary">Your cart is empty</strong>
+  <button class="btn" id="review" disabled>Open cart</button>
+</div>
+
+<dialog id="dlg"></dialog>
+
+<script>
+const comics = [
+  {id:1,t:"Night Falcon",n:"#12",g:"Superhero",p:199,a:"#1d3a8a",b:"#6d28d9"},
+  {id:2,t:"Iron Vanguard",n:"#4",g:"Superhero",p:249,a:"#9a1b1b",b:"#e5287a"},
+  {id:3,t:"Storm Sisters",n:"#1",g:"Superhero",p:179,a:"#0f766e",b:"#1d3a8a"},
+  {id:4,t:"Ramen Samurai",n:"Vol. 3",g:"Manga",p:349,a:"#b4231f",b:"#7c2d12"},
+  {id:5,t:"Moonlit Blade",n:"Vol. 1",g:"Manga",p:329,a:"#312e81",b:"#0f8fae"},
+  {id:6,t:"Pocket Dragons",n:"Vol. 7",g:"Manga",p:339,a:"#c2410c",b:"#9a1b1b"},
+  {id:7,t:"Orbit Zero",n:"#8",g:"Sci-fi",p:229,a:"#0c4a6e",b:"#4c1d95"},
+  {id:8,t:"The Last Signal",n:"#2",g:"Sci-fi",p:259,a:"#064e3b",b:"#0c4a6e"},
+  {id:9,t:"Robo Rascals",n:"#5",g:"Kids",p:149,a:"#0f8fae",b:"#6d28d9"},
+  {id:10,t:"Captain Biscuit",n:"#9",g:"Kids",p:129,a:"#b45309",b:"#be185d"},
+  {id:11,t:"Tea &amp; Thunder",n:"One-shot",g:"Indie",p:299,a:"#7f1d1d",b:"#14532d"},
+  {id:12,t:"Paper Cities",n:"#3",g:"Indie",p:279,a:"#334155",b:"#9d174d"}
+];
+const genres = ["All","Superhero","Manga","Sci-fi","Kids","Indie"];
+const S = '#14213d';
+const art = {
+1:`<svg viewBox="0 0 100 100"><circle cx="50" cy="46" r="32" fill="#ffe9a8"/><path d="M50 26 L58 46 L84 38 L63 58 L50 82 L37 58 L16 38 L42 46Z" fill="#0b1030"/><circle cx="50" cy="40" r="3" fill="#ffd866"/></svg>`,
+2:`<svg viewBox="0 0 100 100"><path d="M50 8 L86 22 V52 C86 74 68 88 50 94 C32 88 14 74 14 52 V22Z" fill="#c7ccd9" stroke="${S}" stroke-width="3"/><polygon points="50,28 57,46 76,46 61,58 67,76 50,65 33,76 39,58 24,46 43,46" fill="#ff4fa3" stroke="${S}" stroke-width="2"/></svg>`,
+3:`<svg viewBox="0 0 100 100"><circle cx="36" cy="36" r="15" fill="#cfd6ff"/><circle cx="56" cy="32" r="20" fill="#e9ecff"/><circle cx="75" cy="43" r="12" fill="#cfd6ff"/><path d="M52 50 L38 76 H51 L45 96 L70 66 H56 L64 50Z" fill="#ffd866" stroke="${S}" stroke-width="2.5"/></svg>`,
+4:`<svg viewBox="0 0 100 100"><path d="M16 54 H84 C84 78 68 90 50 90 C32 90 16 78 16 54Z" fill="#fff" stroke="${S}" stroke-width="3"/><path d="M22 56 Q32 46 42 56 T62 56 T78 56" fill="none" stroke="#ffd866" stroke-width="5"/><path d="M36 40 Q30 30 38 22 M52 40 Q46 28 54 18 M68 40 Q62 30 70 22" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M60 14 L90 52 M68 12 L96 46" stroke="#ff4fa3" stroke-width="3" stroke-linecap="round"/></svg>`,
+5:`<svg viewBox="0 0 100 100"><circle cx="62" cy="38" r="26" fill="#e9ecff"/><g transform="rotate(35 50 55)"><rect x="46" y="6" width="8" height="64" fill="#cfd6ff" stroke="${S}" stroke-width="2"/><rect x="35" y="70" width="30" height="6" fill="#ffd866" stroke="${S}" stroke-width="2"/><rect x="47" y="76" width="6" height="18" fill="#ff4fa3"/></g></svg>`,
+6:`<svg viewBox="0 0 100 100"><path d="M30 34 L26 10 L44 26Z M70 34 L74 10 L56 26Z" fill="#ffd866" stroke="${S}" stroke-width="2"/><circle cx="50" cy="56" r="32" fill="#7ee081" stroke="${S}" stroke-width="3"/><circle cx="38" cy="50" r="7" fill="#fff"/><circle cx="62" cy="50" r="7" fill="#fff"/><circle cx="39" cy="51" r="3.5" fill="${S}"/><circle cx="63" cy="51" r="3.5" fill="${S}"/><path d="M38 70 Q50 80 62 70" fill="none" stroke="${S}" stroke-width="3" stroke-linecap="round"/><circle cx="45" cy="62" r="1.8" fill="${S}"/><circle cx="55" cy="62" r="1.8" fill="${S}"/></svg>`,
+7:`<svg viewBox="0 0 100 100"><ellipse cx="50" cy="52" rx="46" ry="12" fill="none" stroke="#ffd866" stroke-width="5" transform="rotate(-20 50 52)"/><circle cx="50" cy="52" r="24" fill="#ff9e5e" stroke="${S}" stroke-width="3"/><path d="M30 44 Q50 38 70 46 M28 58 Q50 66 72 58" fill="none" stroke="#c2410c" stroke-width="3"/><circle cx="84" cy="20" r="6" fill="#cfd6ff"/></svg>`,
+8:`<svg viewBox="0 0 100 100"><path d="M32 52 A26 26 0 0 1 68 52" fill="none" stroke="#4fd8ff" stroke-width="4" stroke-linecap="round"/><path d="M20 40 A42 42 0 0 1 80 40" fill="none" stroke="#4fd8ff" stroke-width="4" stroke-linecap="round"/><path d="M9 28 A58 58 0 0 1 91 28" fill="none" stroke="#4fd8ff" stroke-width="4" stroke-linecap="round"/><polygon points="50,56 36,94 64,94" fill="none" stroke="#e9ecff" stroke-width="3" stroke-linejoin="round"/><circle cx="50" cy="54" r="6" fill="#ff4fa3"/></svg>`,
+9:`<svg viewBox="0 0 100 100"><path d="M50 8 V22" stroke="${S}" stroke-width="3"/><circle cx="50" cy="8" r="5" fill="#ff4fa3"/><rect x="20" y="22" width="60" height="58" rx="12" fill="#9fb4ff" stroke="${S}" stroke-width="3"/><rect x="12" y="42" width="8" height="18" rx="3" fill="#cfd6ff"/><rect x="80" y="42" width="8" height="18" rx="3" fill="#cfd6ff"/><circle cx="38" cy="46" r="9" fill="#ffd866" stroke="${S}" stroke-width="2"/><circle cx="62" cy="46" r="9" fill="#ffd866" stroke="${S}" stroke-width="2"/><path d="M34 66 H66" stroke="${S}" stroke-width="4" stroke-dasharray="6 4"/></svg>`,
+10:`<svg viewBox="0 0 100 100"><circle cx="50" cy="58" r="30" fill="#e0a458" stroke="${S}" stroke-width="3"/><circle cx="34" cy="68" r="2" fill="#8a5a1c"/><circle cx="66" cy="70" r="2" fill="#8a5a1c"/><path d="M20 40 Q50 4 80 40Z" fill="#1d3a8a" stroke="${S}" stroke-width="3"/><rect x="16" y="38" width="68" height="7" rx="3" fill="#ffd866" stroke="${S}" stroke-width="2"/><circle cx="40" cy="58" r="3.5" fill="${S}"/><circle cx="60" cy="58" r="3.5" fill="${S}"/><path d="M40 70 Q50 80 60 70" fill="none" stroke="${S}" stroke-width="3" stroke-linecap="round"/></svg>`,
+11:`<svg viewBox="0 0 100 100"><path d="M26 50 H74 V62 C74 78 62 86 50 86 C38 86 26 78 26 62Z" fill="#fff" stroke="${S}" stroke-width="3"/><path d="M74 54 C90 54 90 74 72 74" fill="none" stroke="#fff" stroke-width="5"/><ellipse cx="50" cy="90" rx="34" ry="5" fill="#cfd6ff"/><path d="M48 8 L38 32 H49 L44 48 L62 24 H51 L57 8Z" fill="#ffd866" stroke="${S}" stroke-width="2"/></svg>`,
+12:`<svg viewBox="0 0 100 100"><circle cx="76" cy="22" r="12" fill="#ffe9a8"/><g fill="#e9ecff" stroke="${S}" stroke-width="2"><rect x="8" y="52" width="18" height="42"/><rect x="28" y="30" width="20" height="64"/><rect x="50" y="44" width="16" height="50"/><rect x="68" y="58" width="22" height="36"/></g><g fill="#ffd866"><rect x="33" y="38" width="4" height="5"/><rect x="40" y="38" width="4" height="5"/><rect x="33" y="52" width="4" height="5"/><rect x="40" y="66" width="4" height="5"/><rect x="13" y="62" width="4" height="5"/><rect x="55" y="54" width="4" height="5"/><rect x="74" y="68" width="4" height="5"/></g></svg>`
+};
+let filter = "All", cart = {};
+const $ = id => document.getElementById(id);
+const rupee = n => "₹" + n.toLocaleString("en-IN");
+const count = () => Object.values(cart).reduce((a,b)=>a+b,0);
+const total = () => comics.reduce((s,c)=>s+(cart[c.id]||0)*c.p,0);
+
+function renderFilters(){
+  $("filters").innerHTML = genres.map(g =>
+    `<button class="chip" aria-pressed="${g===filter}" data-g="${g}">${g}</button>`).join("");
+}
+function renderGrid(){
+  $("grid").innerHTML = comics.filter(c => filter==="All"||c.g===filter).map(c => `
+    <button class="comic" data-id="${c.id}" aria-label="Add ${c.t} ${c.n} for ${rupee(c.p)}">
+      ${cart[c.id] ? `<span class="badge">${cart[c.id]}</span>` : ""}
+      <div class="cover" style="background:linear-gradient(160deg,${c.a},${c.b})">
+        <i>${c.n}</i><svg class="ship cship" viewBox="-14 -2 78 36" aria-hidden="true"><use href="#ship"/></svg><div class="art">${art[c.id]}</div><b>${c.t}</b>
+      </div>
+      <div class="meta"><span>${c.g}</span><span class="price">${rupee(c.p)}</span></div>
+      <div class="add">Add to cart</div>
+    </button>`).join("");
+}
+function renderTray(){
+  const n = count();
+  $("summary").textContent = n ? `${n} ${n===1?"comic":"comics"} · ${rupee(total())}` : "Your cart is empty";
+  $("review").disabled = !n;
+  $("cartN").textContent = n;
+}
+function renderDialog(){
+  const items = comics.filter(c => cart[c.id]);
+  $("dlg").innerHTML = `
+    <h2>Your cart</h2>
+    ${items.length ? items.map(c => `
+      <div class="row">
+        <div><strong>${c.t}</strong> ${c.n}<br><span class="price">${rupee(c.p)}</span></div>
+        <div class="qty">
+          <button data-dec="${c.id}" aria-label="Remove one ${c.t}">−</button>
+          <strong>${cart[c.id]}</strong>
+          <button data-inc="${c.id}" aria-label="Add one ${c.t}">+</button>
+        </div>
+      </div>`).join("") : `<p class="empty">Your cart is empty. Close this and tap a comic to add it.</p>`}
+    <div class="total"><span>Total</span><span>${rupee(total())}</span></div>
+    <div class="actions">
+      <button class="btn alt" data-close>Keep browsing</button>
+      <button class="btn" data-reserve ${items.length?"":"disabled"}>Reserve for pickup</button>
+    </div>`;
+}
+function refresh(){ renderGrid(); renderTray(); }
+
+$("filters").addEventListener("click", e => {
+  const b = e.target.closest("[data-g]"); if(!b) return;
+  filter = b.dataset.g; renderFilters(); renderGrid();
+});
+$("grid").addEventListener("click", e => {
+  const b = e.target.closest("[data-id]"); if(!b) return;
+  const id = +b.dataset.id; cart[id] = (cart[id]||0) + 1; refresh();
+});
+["review","cartTop"].forEach(id => $(id).addEventListener("click", () => { renderDialog(); $("dlg").showModal(); }));
+$("dlg").addEventListener("click", e => {
+  const t = e.target;
+  if (t.dataset.inc){ cart[t.dataset.inc]++; }
+  else if (t.dataset.dec){ const k = t.dataset.dec; if(--cart[k] <= 0) delete cart[k]; }
+  else if (t.hasAttribute("data-close")){ $("dlg").close(); return; }
+  else if (t.hasAttribute("data-reserve")){
+    const code = "PS-" + String(Math.floor(1000 + Math.random()*9000));
+    const sum = rupee(total());
+    cart = {}; refresh();
+    $("dlg").innerHTML = `
+      <h2>Reserved!</h2>
+      <p>${esc(user?user.name:"Hi")}, show this code at the counter and pay ${sum} when you collect.</p>
+      <div class="code" aria-label="Pickup code ${code}">${code}</div>
+      <div class="actions"><button class="btn" data-done>Done</button></div>`;
+    return;
+  }
+  else if (t.hasAttribute("data-done")){ $("dlg").close(); return; }
+  else return;
+  refresh(); renderDialog();
+});
+
+// Kiosk reset: after 60 seconds with no touches, clear everything for the next customer.
+let idle;
+function resetIdle(){
+  clearTimeout(idle);
+  idle = setTimeout(() => {
+    cart = {}; filter = "All"; signOut();
+    if ($("dlg").open) $("dlg").close();
+    renderFilters(); refresh(); scrollTo(0,0);
+  }, 60000);
+}
+["pointerdown","keydown","scroll"].forEach(ev => addEventListener(ev, resetIdle, {passive:true}));
+
+let user = null;
+const esc = s => s.replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function signOut(){
+  user = null; cart = {}; filter = "All";
+  if ($("dlg").open) $("dlg").close();
+  $("loginForm").reset(); $("uPass").type = "password"; $("loginErr").textContent = "";
+  document.body.classList.add("locked");
+  renderFilters(); refresh(); scrollTo(0,0);
+}
+$("showPw").addEventListener("change", e => { $("uPass").type = e.target.checked ? "text" : "password"; });
+$("loginForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("uName").value.trim(), email = $("uEmail").value.trim(), pass = $("uPass").value, err = $("loginErr");
+  if (name.length < 2){ err.textContent = "Enter your name (at least 2 letters)."; $("uName").focus(); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent = "Enter a valid email ID, like name@example.com."; $("uEmail").focus(); return; }
+  if (pass.length < 6){ err.textContent = "Password must be at least 6 characters."; $("uPass").focus(); return; }
+  user = {name, email};
+  $("uPass").value = ""; err.textContent = "";
+  $("who").textContent = "Welcome, " + name + ".";
+  document.body.classList.remove("locked"); scrollTo(0,0);
+});
+$("out").addEventListener("click", signOut);
+
+renderFilters(); refresh(); resetIdle();
+</script>
+</body>
+</html>
